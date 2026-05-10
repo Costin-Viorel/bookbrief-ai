@@ -41,7 +41,7 @@ export const authOptions: AuthOptions = {
         } else {
           // Sign in
           if (!user) {
-            throw new Error("User not found");
+            throw new Error("Invalid email or password");
           }
 
           const isPasswordValid = await bcrypt.compare(
@@ -50,7 +50,7 @@ export const authOptions: AuthOptions = {
           );
 
           if (!isPasswordValid) {
-            throw new Error("Invalid password");
+            throw new Error("Invalid email or password");
           }
 
           return {

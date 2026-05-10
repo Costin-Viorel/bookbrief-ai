@@ -1,14 +1,31 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useSession, signOut } from "next-auth/react";
+import { useRouter } from "next/navigation";
 
 export default function Dashboard() {
+  const { data: session, status } = useSession();
+  const router = useRouter();
   const [book, setBook] = useState("");
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<any>(null);
   const [error, setError] = useState("");
   const [showEmailForm, setShowEmailForm] = useState(false);
+
+  useEffect(() => {
+    if (status === "loading") return; // Still loading
+    if (!session) router.push("/auth/signin");
+  }, [session, status, router]);
+
+  if (status === "loading") {
+    return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
+  }
+
+  if (!session) {
+    return null; // Will redirect
+  }
 
   async function handleGenerate() {
     if (!book) return;
@@ -91,7 +108,7 @@ export default function Dashboard() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50">
       {/* HEADER */}
-      <div className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-12 px-6 shadow-lg">
+      <div className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-12 px-6 shadow-lg relative">
         <div className="max-w-4xl mx-auto">
           <div className="flex items-center gap-3 mb-2">
             <span className="text-4xl">📚</span>
@@ -99,6 +116,12 @@ export default function Dashboard() {
           </div>
           <p className="text-blue-100 text-lg">Get intelligent summaries and personalized book recommendations</p>
         </div>
+        <button
+          onClick={() => signOut()}
+          className="absolute top-4 right-4 bg-white text-blue-600 px-4 py-2 rounded-lg font-semibold hover:bg-gray-100 transition"
+        >
+          Sign Out
+        </button>
       </div>
 
       {/* MAIN CONTENT */}
@@ -117,7 +140,7 @@ export default function Dashboard() {
           </label>
           <div className="flex gap-3 mb-4">
             <input
-              className="flex-1 border-2 border-gray-200 px-4 py-3 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition"
+              className="flex-1 border-2 border-gray-200 px-4 py-3 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition text-gray-900"
               placeholder="e.g., The Great Gatsby, Dune, 1984..."
               value={book}
               onChange={(e) => setBook(e.target.value)}
@@ -146,7 +169,7 @@ export default function Dashboard() {
             </label>
             <input
               type="email"
-              className="w-full border-2 border-gray-200 px-4 py-2 rounded-lg focus:outline-none focus:border-blue-500 transition"
+              className="w-full border-2 border-gray-200 px-4 py-2 rounded-lg focus:outline-none focus:border-blue-500 transition text-gray-900"
               placeholder="your@email.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
